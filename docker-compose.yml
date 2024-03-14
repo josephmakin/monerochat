@@ -1,0 +1,68 @@
+version: '3'
+services:
+  monerochat:
+    image: josephmakin/monerochat:latest
+    environment:
+      - CALLBACK_URL=http://monerochat:5000/api/v1/transaction
+      - MONEROHUB_ENDPOINT=http://monerohub:8080/api/v1/payment
+      - MONGO_URI=mongodb://admin:password@mongo:27017
+    ports:
+      - 5000:5000
+
+  monerohub:
+    image: josephmakin/monerohub:latest
+    environment:
+      - MONGO_URI=mongodb://admin:password@mongo:27017
+      - RPC_HOST=wallet-rpc
+      - RPC_PORT=18081
+      - REDIS_ADDRESS=redis:6379
+      - REDIS_PASSWORD=password
+    ports:
+      - 8080:8080
+    restart: on-failure
+
+  mongo:
+    image: mongo
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=admin
+      - MONGO_INITDB_ROOT_PASSWORD=password
+    ports:
+      - 27017:27017
+    volumes:
+      - ${PWD}/mongo_data:/data/db:Z
+
+  mongo-express:
+    image: mongo-express
+    environment:
+      - ME_CONFIG_MONGODB_SERVER=mongo
+      - ME_CONFIG_MONGODB_PORT=27017
+      - ME_CONFIG_MONGODB_ADMINUSERNAME=admin
+      - ME_CONFIG_MONGODB_ADMINPASSWORD=password
+      - ME_CONFIG_BASICAUTH_USERNAME=mongo
+      - ME_CONFIG_BASICAUTH_PASSWORD=express
+    ports:
+      - 8081:8081
+    depends_on:
+      - mongo
+
+  redis:
+    image: redis
+    ports:
+      - 6379:6379
+    environment:
+      - REDIS_PASSWORD=password
+
+  wallet-rpc:
+    image: normoes/monero:v0.18.3.1
+    command: monero-wallet-rpc --config-file=/config/config.conf
+    environment:
+      - DAEMON_HOST=stagenet.community.rino.io:38081
+      - DAEMON_PORT=38081
+      - LOG_LEVEL=3
+      - RPC_BIND_PORT=18081
+    ports:
+      - 18081:18081
+    volumes:
+      - ${PWD}/config:/config:Z
+      - ${PWD}/scripts:/scripts:Z
+      - ${PWD}/wallets/stagenet:/monero:Z
