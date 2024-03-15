@@ -10,7 +10,7 @@ import (
 type Donation struct {
 	ID primitive.ObjectID `json:"id" bson:"_id"`
 	Address string `json:"address" bson:"address"`
-	Amount float32 `json:"amount" bson:"amount"`
+	Amount uint64 `json:"amount" bson:"amount"`
 	Message string `json:"message" bson:"message"`
 	Name string `json:"name" bson:"name"`
 	Paid bool `json:"paid" bson:"paid"`

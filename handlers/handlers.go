@@ -155,9 +155,9 @@ func (handler *DonationsHandler) CallbackTransactionHandler (c *gin.Context) {
 		return
 	}
 
-	var total float32
+	var total uint64
 	for _, transaction := range donation.Transactions {
-		total += transaction.Amount / 1e12
+		total += transaction.Amount
 	}
 
 	if total >= donation.Amount {
